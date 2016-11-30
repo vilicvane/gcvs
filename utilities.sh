@@ -74,7 +74,7 @@ gcvs_export() (
     fi
 
     _gcvs_echo "Exporting commit to CVS..."
-    git cvsexportcommit -p -u -c -W HEAD
+    git cvsexportcommit -p -c -W HEAD
 
     _gcvs_echo "Commit exported successfully."
 )
