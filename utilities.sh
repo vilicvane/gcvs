@@ -50,7 +50,7 @@ gcvs_update() (
     git add .
 
     _gcvs_echo "Committing changes..."
-    gcvs_git_commit_as_cvs_update
+    gcvs_git_commit_as_cvs_update || true
 
     # Apply stash only if there is something saved
     if $stashed
@@ -81,7 +81,7 @@ gcvs_export() (
 
 gcvs_git_commit_as_cvs_update() (
     set -e
-    git commit -m "CVS Update (`date`)" || true
+    git commit -m "CVS Update (`date`)"
 )
 
 gcvs_update_gitignore() (
