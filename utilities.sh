@@ -105,7 +105,7 @@ gcvs_export() (
 
     git checkout $branch
     git merge --squash $tmp_branch
-    git commit -m "Merge updates triggered by CVS exporting."
+    git commit -m "Merge updates triggered by CVS exporting." || true
 
     _gcvs_echo "Deleting temporary branch..."
     git branch -D $tmp_branch
