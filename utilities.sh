@@ -81,7 +81,7 @@ gcvs_export() (
 
 gcvs_git_commit_as_cvs_update() (
     set -e
-    git commit -m "CVS Update (`date`)"
+    git commit -m "CVS Update (`date`)" || true
 )
 
 gcvs_update_gitignore() (
