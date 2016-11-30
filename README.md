@@ -32,7 +32,7 @@ gcvs_init
 ### Update reporsitory
 
 ```sh
-gcup
+gcvs_update
 # alias `gcup`
 ```
 
