@@ -14,6 +14,7 @@ gcvs_init() (
     git init
     git config cvsexportcommit.cvsdir .
 
+    _gcvs_echo "Updating .gitignore file..."
     gcvs_update_gitignore
 
     _gcvs_echo "Processing initial commit..."
@@ -42,11 +43,13 @@ gcvs_update() (
     _gcvs_echo "Updating CVS repository..."
     cvsup
 
+    _gcvs_echo "Updating .gitignore file..."
     gcvs_update_gitignore
 
     _gcvs_echo "Staging changes..."
     git add .
 
+    _gcvs_echo "Committing changes..."
     gcvs_git_commit_as_cvs_update
 
     # Apply stash only if there is something saved
@@ -78,15 +81,12 @@ gcvs_export() (
 
 gcvs_git_commit_as_cvs_update() (
     set -e
-
-    _gcvs_echo "Committing changes..."
     git commit -m "CVS Update (`date`)"
 )
 
 gcvs_update_gitignore() (
     set -e
 
-    _gcvs_echo "Updating .gitignore file..."
     cat .cvsignore > .gitignore
     printf "\n\
 CVS/\n\
