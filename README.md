@@ -69,6 +69,15 @@ gcvs_update_gitignore
 # alias `gcui`
 ```
 
+### Cleanup
+
+Remove `.#*`, `.msg` and `.cvsexportcommit.diff` files.
+
+```sh
+gcvs_cleanup
+# alias `gccl`
+```
+
 # License
 
 MIT License.

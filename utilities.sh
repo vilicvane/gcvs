@@ -5,6 +5,7 @@ alias gcup="gcvs_update"
 alias gcxp="gcvs_export"
 alias gccu="gcvs_git_commit_as_cvs_update"
 alias gcui="gcvs_update_gitignore"
+alias gccl="gcvs_cleanup"
 
 gcvs_init() (
     set -e
@@ -94,6 +95,12 @@ CVS/\n\
 .cvsexportcommit.diff\n\
 "\
     >> .gitignore
+)
+
+gcvs_cleanup() (
+    find . -type f -name '.#*' -delete
+    rm .msg
+    rm .cvsexportcommit.diff
 )
 
 _gcvs_echo() {
