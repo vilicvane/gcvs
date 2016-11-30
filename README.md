@@ -69,7 +69,7 @@ gcvs_update_gitignore
 # alias `gcui`
 ```
 
-### Cleanup
+### Clean up
 
 Remove `.#*`, `.msg` and `.cvsexportcommit.diff` files.
 
