@@ -99,8 +99,8 @@ CVS/\n\
 
 gcvs_cleanup() (
     find . -type f -name '.#*' -delete
-    rm .msg
-    rm .cvsexportcommit.diff
+    rm -f .msg
+    rm -f .cvsexportcommit.diff
 )
 
 _gcvs_echo() {
