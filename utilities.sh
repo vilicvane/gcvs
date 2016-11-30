@@ -2,7 +2,7 @@
 # https://github.com/vilic/gcvs
 
 alias gcup="gcvs_update"
-alias gcep="gcvs_export"
+alias gcxp="gcvs_export"
 alias gccu="gcvs_git_commit_as_cvs_update"
 alias gcui="gcvs_update_gitignore"
 
@@ -70,7 +70,9 @@ gcvs_export() (
     fi
 
     _gcvs_echo "Exporting commit to CVS..."
-    git cvsexportcommit -u -p -c -W HEAD
+    git cvsexportcommit -p -c -W HEAD
+
+    _gcvs_echo "Commit exported successfully."
 )
 
 gcvs_git_commit_as_cvs_update() (
@@ -85,7 +87,13 @@ gcvs_update_gitignore() (
 
     _gcvs_echo "Updating .gitignore file..."
     cat .cvsignore > .gitignore
-    printf "\nCVS/\n.#*\n" >> .gitignore
+    printf "\n\
+CVS/\n\
+.#*\n\
+.msg\n\
+.cvsexportcommit.diff\n\
+"\
+    >> .gitignore
 )
 
 _gcvs_echo() {

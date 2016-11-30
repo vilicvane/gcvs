@@ -43,7 +43,7 @@ automatically if export patch applies.
 
 ```sh
 gcvs_export
-# alias `gcep`
+# alias `gcxp`
 ```
 
 ### Git commit as "CVS Update"
