@@ -33,10 +33,10 @@ gcvs_update() (
 
     if [[ $stash_result == *"No local changes to save"* ]]
     then
-        stashed=false
+        local stashed=false
         _gcvs_echo "No local changes to save."
     else
-        stashed=true
+        local stashed=true
     fi
 
     # Now the file in zon should be untouched.
@@ -73,10 +73,44 @@ gcvs_export() (
         exit 1
     fi
 
+    _gcvs_echo "Stashing changes..."
+
+    local stash_result=`git stash --include-untracked`
+
+    if [[ $stash_result == *"No local changes to save"* ]]
+    then
+        local stashed=false
+        _gcvs_echo "No local changes to save."
+    else
+        local stashed=true
+    fi
+
+    local branch=`git rev-parse --abbrev-ref HEAD`
+
+    git checkout -q HEAD~1
+
+    local tmp_branch="tmp-$(date +%s)"
+
+    _gcvs_echo "Checking out temporary branch $tmp_branch..."
+    git checkout -b $tmp_branch
+
     _gcvs_echo "Exporting commit to CVS..."
-    git cvsexportcommit -p -c -W HEAD
+    git cvsexportcommit -p -u -c $branch
 
     _gcvs_echo "Commit exported successfully."
+    _gcvs_echo "Merging changes back to $branch..."
+
+    git add .
+    git commit -m "-" || true
+
+    git checkout $branch
+    git merge --squash $tmp_branch
+    git commit -m "Merge updates triggered by CVS exporting."
+
+    _gcvs_echo "Deleting temporary branch..."
+    git branch -D $tmp_branch
+
+    _gcvs_echo "Exporting completed."
 )
 
 gcvs_git_commit_as_cvs_update() (
