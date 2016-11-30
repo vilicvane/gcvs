@@ -110,6 +110,12 @@ gcvs_export() (
     _gcvs_echo "Deleting temporary branch..."
     git branch -D $tmp_branch
 
+    if $stashed
+    then
+        _gcvs_echo "Applying stash..."
+        git stash pop
+    fi
+
     _gcvs_echo "Exporting completed."
 )
 
