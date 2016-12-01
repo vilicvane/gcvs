@@ -90,7 +90,7 @@ gcvs_cleanup
 When things got messy, you may need to handle them yourself:
 
 1. Check out your working branch, fix contents and execute `cvsup` manually.
-2. Make sure no modification is made regarding to CVS (If there is any, revert
+2. Make sure no modification is made regarding to CVS (if there is any, revert
    it or commit them using CVS).
 3. Stage every change to Git repository, then execute
    `gcvs_git_commit_as_cvs_update` to commit.
