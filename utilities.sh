@@ -86,13 +86,10 @@ gcvs_export() (
     fi
 
     local branch=`git rev-parse --abbrev-ref HEAD`
-
-    git checkout -q HEAD~1
-
     local tmp_branch="tmp-$(date +%s)"
 
     _gcvs_echo "Checking out temporary branch $tmp_branch..."
-    git checkout -b $tmp_branch
+    git checkout -b $tmp_branch HEAD~1
 
     _gcvs_echo "Exporting commit to CVS..."
     git cvsexportcommit -p -u -c $branch
