@@ -46,6 +46,13 @@ gcvs_export
 # alias `gcxp`
 ```
 
+### Continue export last commit after resolving conflict
+
+```sh
+gcvs_export_continue
+# alias `gcxpc`
+```
+
 ### Git commit as "CVS Update"
 
 Do Git commit with message `"CVS Update (...)"` (commit with message in this
@@ -77,6 +84,16 @@ Remove `.#*`, `.msg` and `.cvsexportcommit.diff` files.
 gcvs_cleanup
 # alias `gccl`
 ```
+
+### When things got messy
+
+When things got messy, you may need to handle them yourself:
+
+1. Check out your working branch, fix contents and execute `cvsup` manually.
+2. Make sure no modification is made regarding to CVS (If there is any, revert
+   it or commit them using CVS).
+3. Stage every change to Git repository, then execute
+   `gcvs_git_commit_as_cvs_update` to commit.
 
 # License
 

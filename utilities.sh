@@ -3,6 +3,7 @@
 
 alias gcup="gcvs_update"
 alias gcxp="gcvs_export"
+alias gcxpc="gcvs_export_continue"
 alias gccu="gcvs_git_commit_as_cvs_update"
 alias gcui="gcvs_update_gitignore"
 alias gccl="gcvs_cleanup"
@@ -24,6 +25,8 @@ gcvs_init() (
     _gcvs_echo "Repository initialized."
 )
 
+# TODO: add an exported commits list, and if a commit is not exported, do
+# something like rebase.
 gcvs_update() (
     set -e
 
@@ -50,7 +53,7 @@ gcvs_update() (
     git add .
 
     _gcvs_echo "Committing changes..."
-    gcvs_git_commit_as_cvs_update || true
+    git commit -m "CVS update (`date`)" || true
 
     # Apply stash only if there is something saved
     if $stashed
@@ -65,9 +68,13 @@ gcvs_update() (
 gcvs_export() (
     set -e
 
+    local timestamp=`_gcvs_get_var timestamp`
+
+    _gcvs_delete_var timestamp
+
     local last_commit_message=`git log -1 --pretty=%B`
 
-    if [[ $last_commit_message == "CVS Update"* ]]
+    if [[ $last_commit_message == "CVS update"* ]]
     then
         _gcvs_echo "Current commit is a CVS update commit, exporting aborted."
         exit 1
@@ -75,70 +82,191 @@ gcvs_export() (
 
     _gcvs_echo "Stashing changes..."
 
-    local stash_result=`git stash --include-untracked`
-
-    if [[ $stash_result == *"No local changes to save"* ]]
+    if [[ -z $timestamp ]]
     then
-        local stashed=false
-        _gcvs_echo "No local changes to save."
-    else
-        local stashed=true
+        timestamp=`date +%s`
+
+        local stash_result=`git stash save --include-untracked\
+            "stash-$timestamp"`
+
+        if [[ $stash_result == *"No local changes to save"* ]]
+        then
+            _gcvs_echo "No local changes to save."
+        fi
     fi
 
     local branch=`git rev-parse --abbrev-ref HEAD`
-    local tmp_branch="tmp-$(date +%s)"
+    local tmp_branch="tmp-$timestamp"
 
-    _gcvs_echo "Checking out temporary branch $tmp_branch..."
-    git checkout -b $tmp_branch HEAD~1
+    _gcvs_set_var branch "$branch"
+    _gcvs_set_var message "$last_commit_message"
+
+    _gcvs_echo "Checking out temporary branch \`$tmp_branch\`..."
+    git checkout -b "$tmp_branch" HEAD~1
 
     _gcvs_echo "Exporting commit to CVS..."
-    git cvsexportcommit -p -u -c $branch
 
-    _gcvs_echo "Commit exported successfully."
-    _gcvs_echo "Merging changes back to $branch..."
+    set +e
+    git cvsexportcommit -cpu "$branch~1" "$branch"
+    local export_status=$?
+    set -e
 
     git add .
-    git commit -m "-" || true
+    git commit -m "CVS update during exporting (`date`)" || true
 
-    git checkout $branch
-    git merge --squash $tmp_branch
-    git commit -m "Merge updates triggered by CVS exporting." || true
-
-    _gcvs_echo "Deleting temporary branch..."
-    git branch -D $tmp_branch
-
-    if $stashed
+    if [[ $export_status -eq 0 ]]
     then
-        _gcvs_echo "Applying stash..."
-        git stash pop
+        _gcvs_echo "Commit exported successfully."
+        _gcvs_echo "Merging changes back to \`$branch\`..."
+
+        git checkout "$branch"
+        git merge --squash "$tmp_branch"
+        git commit -m "Merge updates triggered by CVS exporting." || true
+
+        _gcvs_echo "Deleting temporary branch..."
+        git branch -D "$tmp_branch"
+
+        local stash_index=`git stash list | grep "stash-$timestamp\$" |\
+            grep -o --color=never "stash@{[0-9]\+}"`
+
+        if [[ -n $stash_index ]]
+        then
+            _gcvs_echo "Applying stash..."
+            git stash pop "$stash_index"
+        fi
+
+        _gcvs_echo "Exporting completed."
+    else
+        _gcvs_echo "Merging \`$branch\` to temporary branch..."
+
+        set +e
+        git merge "$branch" -m "$last_commit_message"
+        local merge_status=$?
+        set -e
+
+        if [[ $merge_status -eq 0 ]]
+        then
+            _gcvs_echo "Automatic merging succeed, please review the content \
+on this temporary branch, make nacessary changes and execute \
+\`gcvs_export_continue\` to export again."
+        else
+            _gcvs_echo "Automatic merging failed, please resolve conflict \
+manually and commit to this temporary branch. Then execute \
+\`gcvs_export_continue\` to export again."
+        fi
+    fi
+)
+
+gcvs_export_continue() (
+    set -e
+
+    local branch=${1:-`_gcvs_get_var branch`}
+
+    if [[ -z $branch ]]
+    then
+        _gcvs_echo "Please specify the working branch, possibly \`master\`?"
+        exit 1
     fi
 
-    _gcvs_echo "Exporting completed."
+    local tmp_branch=`git rev-parse --abbrev-ref HEAD`
+
+    if [[ $tmp_branch != "tmp-"* ]]
+    then
+        _gcvs_echo "Current branch \`$tmp_branch\` does not seem like a \
+temporary branch, aborted."
+        exit 1
+    fi
+
+    local status_output=`git status --porcelain`
+
+    if [[ -n `echo "$status_output" | grep -v "^[^? ]"` ]]
+    then
+        _gcvs_echo "Directory not clean, please stage all the changes."
+        exit 1
+    fi
+
+    if [[ -n $status_output ]]
+    then
+        local message=`_gcvs_get_var message`
+
+        if [[ -z $message ]]
+        then
+            _gcvs_echo "Cannot find commit message, please commit manually \
+before continue."
+        fi
+
+        _gcvs_echo "Committing changes..."
+        git commit -m "$message" || true
+    fi
+
+    _gcvs_set_var timestamp `echo "$tmp_branch" | sed s/^tmp-//`
+
+    git checkout "$branch"
+    git reset --hard HEAD~1
+    git merge "$tmp_branch"
+
+    _gcvs_echo "Deleting temporary branch, will create again later..."
+    git branch -D "$tmp_branch"
+
+    gcvs_export
 )
 
 gcvs_git_commit_as_cvs_update() (
     set -e
-    git commit -m "CVS Update (`date`)"
+    git commit -m "CVS update (`date`)"
 )
 
 gcvs_update_gitignore() (
     set -e
 
-    cat .cvsignore > .gitignore
-    printf "\n\
+    local gitignore_path=`_gcvs_repository_dir`/.gitignore
+
+    cat .cvsignore > "$gitignore_path"
+    printf '\n\
 CVS/\n\
 .#*\n\
 .msg\n\
 .cvsexportcommit.diff\n\
-"\
-    >> .gitignore
+'\
+    >> "$gitignore_path"
 )
 
 gcvs_cleanup() (
-    find . -type f -name '.#*' -delete
-    rm -f .msg
-    rm -f .cvsexportcommit.diff
+    find . -type f -name '.#*' -delete -printf "removed %p\n"
+    rm -fv .msg
+    rm -fv .cvsexportcommit.diff
 )
+
+# _gcvs_get_var "name"
+_gcvs_get_var() {
+    local var_path=`_gcvs_dot_git_dir`/gcvs/vars/$1
+
+    if [[ -e $var_path ]]
+    then
+        cat "$var_path"
+    fi
+}
+
+# _gcvs_set_var "name" "value"
+_gcvs_set_var() {
+    local gcvs_vars_dir=`_gcvs_dot_git_dir`/gcvs/vars
+
+    mkdir -p "$gcvs_vars_dir"
+    echo "$2" > "$gcvs_vars_dir/$1"
+}
+
+# _gcvs_delete_var "name"
+_gcvs_delete_var() {
+    rm -f "`_gcvs_dot_git_dir`/gcvs/vars/$1"
+}
+
+_gcvs_repository_dir() {
+    echo "`git rev-parse --show-toplevel`"
+}
+
+_gcvs_dot_git_dir() {
+    echo "`git rev-parse --git-dir`"
+}
 
 _gcvs_echo() {
     echo -e "$(tput bold)$1$(tput sgr0)"
