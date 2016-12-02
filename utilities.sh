@@ -223,7 +223,6 @@ gcvs_update_gitignore() (
 
     cat .cvsignore > "$gitignore_path"
     printf '\n\
-CVS/\n\
 .#*\n\
 .msg\n\
 .cvsexportcommit.diff\n\
