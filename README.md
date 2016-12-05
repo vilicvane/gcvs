@@ -56,7 +56,7 @@ gcvs_export_continue
 ### Git commit as "CVS update"
 
 Do Git commit with message `"CVS update (...)"` (commit with message in this
-formmat will abort exporting). You may need to do so when your repository gets
+format will abort exporting). You may need to do so when your repository gets
 messy and need to by synchronized manually.
 
 ```sh
