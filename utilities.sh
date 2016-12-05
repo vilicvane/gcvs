@@ -112,7 +112,7 @@ gcvs_export() (
     set -e
 
     git add .
-    git commit -m "CVS update during exporting (`date`)" || true
+    git commit -m "-" || true
 
     if [[ $export_status -eq 0 ]]
     then
@@ -121,7 +121,7 @@ gcvs_export() (
 
         git checkout "$branch"
         git merge --squash "$tmp_branch"
-        git commit -m "Merge updates triggered by CVS exporting." || true
+        git commit -m "CVS update during exporting (`date`)" || true
 
         _gcvs_echo "Deleting temporary branch..."
         git branch -D "$tmp_branch"
