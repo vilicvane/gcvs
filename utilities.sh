@@ -53,7 +53,7 @@ gcvs_update() (
     git add .
 
     _gcvs_echo "Committing changes..."
-    git commit -m "CVS update (`date`)" || true
+    git commit -m "CVS update" || true
 
     # Apply stash only if there is something saved
     if $stashed
@@ -121,7 +121,7 @@ gcvs_export() (
 
         git checkout "$branch"
         git merge --squash "$tmp_branch"
-        git commit -m "CVS update during exporting (`date`)" || true
+        git commit -m "CVS update during exporting" || true
 
         _gcvs_echo "Deleting temporary branch..."
         git branch -D "$tmp_branch"
@@ -154,6 +154,9 @@ on this temporary branch, make nacessary changes and execute \
 manually and commit to this temporary branch. Then execute \
 \`gcvs_export_continue\` to export again."
         fi
+        _gcvs_echo "If the exporting process doesn't seem to be right to you, \
+try to checkout your working branch \`$branch\`, fix potential causes and try \
+to start the process again."
     fi
 )
 
@@ -213,7 +216,7 @@ before continue."
 
 gcvs_git_commit_as_cvs_update() (
     set -e
-    git commit -m "CVS update (`date`)"
+    git commit -m "CVS update"
 )
 
 gcvs_update_gitignore() (
