@@ -154,6 +154,7 @@ on this temporary branch, make nacessary changes and execute \
 manually and commit to this temporary branch. Then execute \
 \`gcvs_export_continue\` to export again."
         fi
+
         _gcvs_echo "If the exporting process doesn't seem to be right to you, \
 try to checkout your working branch \`$branch\`, fix potential causes and try \
 to start the process again."
@@ -237,6 +238,13 @@ gcvs_cleanup() (
     find . -type f -name '.#*' -delete -printf "removed %p\n"
     rm -fv .msg
     rm -fv .cvsexportcommit.diff
+
+    local branches=`git branch | grep --color=never "^\s\+tmp-" | xargs`
+
+    if [[ -n $branches ]]
+    then
+        git branch -D $branches
+    fi
 )
 
 # _gcvs_get_var "name"

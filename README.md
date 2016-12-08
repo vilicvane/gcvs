@@ -78,7 +78,7 @@ gcvs_update_gitignore
 
 ### Clean up
 
-Remove `.#*`, `.msg` and `.cvsexportcommit.diff` files.
+Remove `.#*`, `.msg`, `.cvsexportcommit.diff` files and `tmp-*` branches.
 
 ```sh
 gcvs_cleanup
