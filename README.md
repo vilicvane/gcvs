@@ -85,9 +85,29 @@ gcvs_cleanup
 # alias `gccl`
 ```
 
+### Hooks
+
+It provides `gcvs_on_export_complete` and `gcvs_on_update_complete` as hooks.
+
+You can add them as aliases or functions, e.g.:
+
+```sh
+alias gcvs_on_export_complete="zlxc relink"
+alias gcvs_on_update_complete="zlxc relink"
+```
+
 ### When things got messy
 
 When things got messy, you may need to handle them yourself:
+
+#### Resetting to a clean head
+
+1. Check out your working branch, and make sure repository is clean by running
+   `git status`.
+2. Make nacessary changes if the previous failure is due to an invalid commit.
+3. Restart the failed operation.
+
+#### Manually repository synchronizing
 
 1. Check out your working branch, fix contents and execute `cvsup` manually.
 2. Make sure no modification is made regarding to CVS (if there is any, revert

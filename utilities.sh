@@ -63,6 +63,11 @@ gcvs_update() (
     fi
 
     _gcvs_echo "Repository updated."
+
+    if type gcvs_on_update_complete &> /dev/null
+    then
+        gcvs_on_update_complete
+    fi
 )
 
 gcvs_export() (
@@ -136,6 +141,11 @@ gcvs_export() (
         fi
 
         _gcvs_echo "Exporting completed."
+
+        if type gcvs_on_export_complete &> /dev/null
+        then
+            gcvs_on_export_complete
+        fi
     else
         _gcvs_echo "Merging \`$branch\` to temporary branch..."
 
