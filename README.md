@@ -89,11 +89,16 @@ gcvs_cleanup
 
 It provides `gcvs_on_export_complete` and `gcvs_on_update_complete` as hooks.
 
-You can add them as aliases or functions, e.g.:
+You can add functions named after them, e.g.:
 
 ```sh
-alias gcvs_on_export_complete="zlxc relink"
-alias gcvs_on_update_complete="zlxc relink"
+gcvs_on_export_complete() {
+    zlxc relink
+}
+
+gcvs_on_update_complete() {
+    zlxc relink
+}
 ```
 
 ### When things got messy
