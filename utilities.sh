@@ -73,6 +73,15 @@ gcvs_update() (
 gcvs_export() (
     set -e
 
+    local branch=`git rev-parse --abbrev-ref HEAD`
+
+    if [[ $branch == "tmp-"* ]]
+    then
+        _gcvs_echo "Current branch \`$branch\` seems like a temporary branch, \
+aborted."
+        exit 1
+    fi
+
     local timestamp=`_gcvs_get_var timestamp`
 
     _gcvs_delete_var timestamp
