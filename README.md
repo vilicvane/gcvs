@@ -76,6 +76,9 @@ gcvs_update_gitignore
 # alias `gcui`
 ```
 
+You can also create a custom `.git/extra.gitignore` file to tell gcvs what to
+add to the `.gitignore` file.
+
 ### Clean up
 
 Remove `.#*`, `.msg`, `.cvsexportcommit.diff` files and `tmp-*` branches.

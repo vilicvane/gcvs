@@ -243,14 +243,21 @@ gcvs_update_gitignore() (
     set -e
 
     local gitignore_path=`_gcvs_repository_dir`/.gitignore
+    local extra_gitignore_path=`_gcvs_dot_git_dir`/extra.gitignore
 
     cat .cvsignore > "$gitignore_path"
-    printf '\n\
-.#*\n\
-.msg\n\
-.cvsexportcommit.diff\n\
+    printf '
+.#*
+.msg
+.cvsexportcommit.diff
 '\
     >> "$gitignore_path"
+
+    if [[ -f $extra_gitignore_path ]]
+    then
+        printf "\n" >> "$gitignore_path"
+        cat "$extra_gitignore_path" >> "$gitignore_path"
+    fi
 )
 
 gcvs_cleanup() (
